@@ -109,6 +109,14 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorBody = await response.text()
       console.error(`OpenAI API error ${response.status}: ${errorBody}`)
+
+      if (response.status === 429) {
+        return NextResponse.json(
+          { message: "A Lia está temporariamente indisponível. Tente novamente em alguns minutos 💛" },
+          { status: 503 },
+        )
+      }
+
       throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`)
     }
 
