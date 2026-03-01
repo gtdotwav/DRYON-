@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 
 const SYSTEM_PROMPT = `Você é a Lia, a assistente virtual inteligente da DryOn.
 
@@ -54,8 +54,8 @@ const MAX_MESSAGE_LENGTH = 500
 
 export async function POST(request: NextRequest) {
   try {
-    if (!OPENAI_API_KEY) {
-      console.error("OPENAI_API_KEY not configured. Env keys available:", Object.keys(process.env).filter(k => k.includes("OPENAI")).join(", ") || "none")
+    if (!GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY not configured")
       return NextResponse.json(
         { message: "Serviço temporariamente indisponível." },
         { status: 503 },
@@ -82,33 +82,31 @@ export async function POST(request: NextRequest) {
     const sanitizedMessages = messages
       .filter((m: { role?: string; content?: string }) => m.role && m.content)
       .map((m: { role: string; content: string }) => ({
-        role: m.role === "user" ? "user" : "assistant",
-        content: String(m.content).slice(0, MAX_MESSAGE_LENGTH),
+        role: m.role === "user" ? "user" : "model",
+        parts: [{ text: String(m.content).slice(0, MAX_MESSAGE_LENGTH) }],
       }))
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: SYSTEM_PROMPT,
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [{ text: SYSTEM_PROMPT }],
           },
-          ...sanitizedMessages,
-        ],
-        temperature: 0.8,
-        max_tokens: 300,
-      }),
-    })
+          contents: sanitizedMessages,
+          generationConfig: {
+            temperature: 0.8,
+            maxOutputTokens: 300,
+          },
+        }),
+      },
+    )
 
     if (!response.ok) {
       const errorBody = await response.text()
-      console.error(`OpenAI API error ${response.status}: ${errorBody}`)
+      console.error(`Gemini API error ${response.status}: ${errorBody}`)
 
       if (response.status === 429) {
         return NextResponse.json(
@@ -117,11 +115,15 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`)
+      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`)
     }
 
     const data = await response.json()
-    const message = data.choices?.[0]?.message?.content
+    const message = data.candidates?.[0]?.content?.parts?.[0]?.text
+
+    if (!message) {
+      throw new Error("No response from Gemini")
+    }
 
     return NextResponse.json({ message })
   } catch (error) {
