@@ -55,7 +55,7 @@ const MAX_MESSAGE_LENGTH = 500
 export async function POST(request: NextRequest) {
   try {
     if (!OPENAI_API_KEY) {
-      console.error("OPENAI_API_KEY not configured")
+      console.error("OPENAI_API_KEY not configured. Env keys available:", Object.keys(process.env).filter(k => k.includes("OPENAI")).join(", ") || "none")
       return NextResponse.json(
         { message: "Serviço temporariamente indisponível." },
         { status: 503 },
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
         Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-4",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
@@ -107,11 +107,13 @@ export async function POST(request: NextRequest) {
     })
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.statusText}`)
+      const errorBody = await response.text()
+      console.error(`OpenAI API error ${response.status}: ${errorBody}`)
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`)
     }
 
     const data = await response.json()
-    const message = data.choices[0].message.content
+    const message = data.choices?.[0]?.message?.content
 
     return NextResponse.json({ message })
   } catch (error) {
