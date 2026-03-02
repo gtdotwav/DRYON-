@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
+function getApiKey() {
+  return process.env.ANTHROPIC_API_KEY
+}
 
 const SYSTEM_PROMPT = `Você é a Lia, a assistente virtual inteligente da DryOn.
 
@@ -54,7 +56,8 @@ const MAX_MESSAGE_LENGTH = 500
 
 export async function POST(request: NextRequest) {
   try {
-    if (!ANTHROPIC_API_KEY) {
+    const apiKey = getApiKey()
+    if (!apiKey) {
       console.error("ANTHROPIC_API_KEY not configured")
       return NextResponse.json(
         { message: "Serviço temporariamente indisponível." },
@@ -90,7 +93,7 @@ export async function POST(request: NextRequest) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": ANTHROPIC_API_KEY,
+        "x-api-key": apiKey,
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
@@ -124,7 +127,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ message })
   } catch (error) {
-    console.error("Chat API error:", error)
+    const errMsg = error instanceof Error ? `${error.name}: ${error.message}` : String(error)
+    console.error("Chat API error:", errMsg)
     return NextResponse.json(
       { message: "Acho que meu modo ON piscou por um segundo 😅 Pode repetir?" },
       { status: 500 },
