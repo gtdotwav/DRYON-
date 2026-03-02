@@ -63,8 +63,6 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  console.log("API key length:", apiKey.length)
-
   let body: { messages?: unknown }
   try {
     body = await request.json()
@@ -120,9 +118,8 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Temporary debug info — remove after fixing
       return NextResponse.json(
-        { message: "Acho que meu modo ON piscou por um segundo 😅 Pode repetir?", _debug: { status: response.status, error: errorBody.slice(0, 200), keyLen: apiKey.length } },
+        { message: "Acho que meu modo ON piscou por um segundo 😅 Pode repetir?" },
         { status: 500 },
       )
     }
@@ -143,7 +140,7 @@ export async function POST(request: NextRequest) {
     const msg = error instanceof Error ? error.name + ": " + error.message : String(error)
     console.error("Chat fetch error: " + msg)
     return NextResponse.json(
-      { message: "Acho que meu modo ON piscou por um segundo 😅 Pode repetir?", _debug: { caught: msg } },
+      { message: "Acho que meu modo ON piscou por um segundo 😅 Pode repetir?" },
       { status: 500 },
     )
   }
