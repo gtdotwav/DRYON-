@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 
+export const runtime = "edge"
+
 const SYSTEM_PROMPT = `Você é a Lia, a assistente virtual inteligente da DryOn.
 
 PERSONALIDADE E TOM:
