@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server"
-import Anthropic from "@anthropic-ai/sdk"
 
 const SYSTEM_PROMPT = `Você é a Lia, a assistente virtual inteligente da DryOn.
 
@@ -52,7 +51,7 @@ const MAX_MESSAGES = 20
 const MAX_MESSAGE_LENGTH = 500
 
 export async function POST(request: NextRequest) {
-  const apiKey = process.env.ANTHROPIC_API_KEY
+  const apiKey = (process.env.ANTHROPIC_API_KEY || "").trim()
   if (!apiKey) {
     console.error("ANTHROPIC_API_KEY not configured")
     return NextResponse.json(
@@ -60,6 +59,8 @@ export async function POST(request: NextRequest) {
       { status: 503 },
     )
   }
+
+  console.log("API key length:", apiKey.length, "starts with:", apiKey.slice(0, 10))
 
   let body: { messages?: unknown }
   try {
@@ -83,25 +84,50 @@ export async function POST(request: NextRequest) {
   const sanitizedMessages = messages
     .filter((m: { role?: string; content?: string }) => m.role && m.content)
     .map((m: { role: string; content: string }) => ({
-      role: (m.role === "user" ? "user" : "assistant") as "user" | "assistant",
+      role: m.role === "user" ? "user" : "assistant",
       content: String(m.content).slice(0, MAX_MESSAGE_LENGTH),
     }))
 
-  try {
-    const client = new Anthropic({ apiKey })
+  const requestBody = JSON.stringify({
+    model: "claude-haiku-4-5-20251001",
+    max_tokens: 300,
+    system: SYSTEM_PROMPT,
+    messages: sanitizedMessages,
+  })
 
-    const response = await client.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 300,
-      system: SYSTEM_PROMPT,
-      messages: sanitizedMessages,
+  try {
+    const response = await globalThis.fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: new Headers({
+        "content-type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+      }),
+      body: requestBody,
     })
 
-    const textBlock = response.content.find((block) => block.type === "text")
-    const message = textBlock && "text" in textBlock ? textBlock.text : null
+    if (!response.ok) {
+      const errorBody = await response.text()
+      console.error("Anthropic API error " + response.status + ": " + errorBody)
+
+      if (response.status === 429) {
+        return NextResponse.json(
+          { message: "A Lia está temporariamente indisponível. Tente novamente em alguns minutos 💛" },
+          { status: 503 },
+        )
+      }
+
+      return NextResponse.json(
+        { message: "Acho que meu modo ON piscou por um segundo 😅 Pode repetir?" },
+        { status: 500 },
+      )
+    }
+
+    const data = await response.json()
+    const message = data.content?.[0]?.text
 
     if (!message) {
-      console.error("No text in Claude response:", JSON.stringify(response.content).slice(0, 300))
+      console.error("No text in response: " + JSON.stringify(data).slice(0, 300))
       return NextResponse.json(
         { message: "Acho que meu modo ON piscou por um segundo 😅 Pode repetir?" },
         { status: 500 },
@@ -110,16 +136,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ message })
   } catch (error) {
-    const errMsg = error instanceof Error ? error.message : String(error)
-    console.error("Claude API error:", errMsg)
-
-    if (errMsg.includes("rate_limit") || errMsg.includes("429")) {
-      return NextResponse.json(
-        { message: "A Lia está temporariamente indisponível. Tente novamente em alguns minutos 💛" },
-        { status: 503 },
-      )
-    }
-
+    const msg = error instanceof Error ? error.name + ": " + error.message : String(error)
+    console.error("Chat fetch error: " + msg)
     return NextResponse.json(
       { message: "Acho que meu modo ON piscou por um segundo 😅 Pode repetir?" },
       { status: 500 },
