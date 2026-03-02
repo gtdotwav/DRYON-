@@ -55,41 +55,44 @@ const MAX_MESSAGES = 20
 const MAX_MESSAGE_LENGTH = 500
 
 export async function POST(request: NextRequest) {
+  const apiKey = getApiKey()
+  if (!apiKey) {
+    console.error("ANTHROPIC_API_KEY not configured")
+    return NextResponse.json(
+      { message: "Serviço temporariamente indisponível." },
+      { status: 503 },
+    )
+  }
+
+  let body: { messages?: unknown }
   try {
-    const apiKey = getApiKey()
-    if (!apiKey) {
-      console.error("ANTHROPIC_API_KEY not configured")
-      return NextResponse.json(
-        { message: "Serviço temporariamente indisponível." },
-        { status: 503 },
-      )
-    }
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ message: "Mensagem inválida." }, { status: 400 })
+  }
 
-    const body = await request.json()
-    const { messages } = body
+  const { messages } = body
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return NextResponse.json({ message: "Mensagem inválida." }, { status: 400 })
+  }
 
-    if (!Array.isArray(messages) || messages.length === 0) {
-      return NextResponse.json(
-        { message: "Mensagem inválida." },
-        { status: 400 },
-      )
-    }
+  if (messages.length > MAX_MESSAGES) {
+    return NextResponse.json(
+      { message: "Conversa muito longa. Por favor, inicie uma nova conversa." },
+      { status: 400 },
+    )
+  }
 
-    if (messages.length > MAX_MESSAGES) {
-      return NextResponse.json(
-        { message: "Conversa muito longa. Por favor, inicie uma nova conversa." },
-        { status: 400 },
-      )
-    }
+  const sanitizedMessages = messages
+    .filter((m: { role?: string; content?: string }) => m.role && m.content)
+    .map((m: { role: string; content: string }) => ({
+      role: m.role === "user" ? "user" : "assistant",
+      content: String(m.content).slice(0, MAX_MESSAGE_LENGTH),
+    }))
 
-    const sanitizedMessages = messages
-      .filter((m: { role?: string; content?: string }) => m.role && m.content)
-      .map((m: { role: string; content: string }) => ({
-        role: m.role === "user" ? "user" : "assistant",
-        content: String(m.content).slice(0, MAX_MESSAGE_LENGTH),
-      }))
-
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+  let response: Response
+  try {
+    response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -103,32 +106,46 @@ export async function POST(request: NextRequest) {
         messages: sanitizedMessages,
       }),
     })
+  } catch (fetchErr) {
+    console.error("Fetch to Anthropic failed:", fetchErr instanceof Error ? fetchErr.message : String(fetchErr))
+    return NextResponse.json(
+      { message: "Acho que meu modo ON piscou por um segundo 😅 Pode repetir?" },
+      { status: 500 },
+    )
+  }
 
-    if (!response.ok) {
-      const errorBody = await response.text()
-      console.error(`Anthropic API error ${response.status}: ${errorBody}`)
+  if (!response.ok) {
+    const errorBody = await response.text()
+    console.error(`Anthropic API error ${response.status}: ${errorBody}`)
 
-      if (response.status === 429) {
-        return NextResponse.json(
-          { message: "A Lia está temporariamente indisponível. Tente novamente em alguns minutos 💛" },
-          { status: 503 },
-        )
-      }
-
-      throw new Error(`Anthropic API error: ${response.status} ${response.statusText}`)
+    if (response.status === 429) {
+      return NextResponse.json(
+        { message: "A Lia está temporariamente indisponível. Tente novamente em alguns minutos 💛" },
+        { status: 503 },
+      )
     }
 
+    return NextResponse.json(
+      { message: "Acho que meu modo ON piscou por um segundo 😅 Pode repetir?" },
+      { status: 500 },
+    )
+  }
+
+  try {
     const data = await response.json()
     const message = data.content?.[0]?.text
 
     if (!message) {
-      throw new Error("No response from Claude")
+      console.error("No text in Claude response:", JSON.stringify(data).slice(0, 500))
+      return NextResponse.json(
+        { message: "Acho que meu modo ON piscou por um segundo 😅 Pode repetir?" },
+        { status: 500 },
+      )
     }
 
     return NextResponse.json({ message })
-  } catch (error) {
-    const errMsg = error instanceof Error ? `${error.name}: ${error.message}` : String(error)
-    console.error("Chat API error:", errMsg)
+  } catch (parseErr) {
+    console.error("Failed to parse Claude response:", parseErr instanceof Error ? parseErr.message : String(parseErr))
     return NextResponse.json(
       { message: "Acho que meu modo ON piscou por um segundo 😅 Pode repetir?" },
       { status: 500 },
