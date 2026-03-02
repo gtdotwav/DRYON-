@@ -53,7 +53,8 @@ const MAX_MESSAGES = 20
 const MAX_MESSAGE_LENGTH = 500
 
 export async function POST(request: NextRequest) {
-  const apiKey = (process.env.ANTHROPIC_API_KEY || "").trim()
+  // Strip any non-printable/invisible characters that may have been pasted into Vercel env
+  const apiKey = (process.env.ANTHROPIC_API_KEY || "").replace(/[^a-zA-Z0-9\-_]/g, "")
   if (!apiKey) {
     console.error("ANTHROPIC_API_KEY not configured")
     return NextResponse.json(
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  console.log("API key length:", apiKey.length, "starts with:", apiKey.slice(0, 10))
+  console.log("API key length:", apiKey.length)
 
   let body: { messages?: unknown }
   try {
@@ -119,8 +120,9 @@ export async function POST(request: NextRequest) {
         )
       }
 
+      // Temporary debug info — remove after fixing
       return NextResponse.json(
-        { message: "Acho que meu modo ON piscou por um segundo 😅 Pode repetir?" },
+        { message: "Acho que meu modo ON piscou por um segundo 😅 Pode repetir?", _debug: { status: response.status, error: errorBody.slice(0, 200), keyLen: apiKey.length } },
         { status: 500 },
       )
     }
@@ -141,7 +143,7 @@ export async function POST(request: NextRequest) {
     const msg = error instanceof Error ? error.name + ": " + error.message : String(error)
     console.error("Chat fetch error: " + msg)
     return NextResponse.json(
-      { message: "Acho que meu modo ON piscou por um segundo 😅 Pode repetir?" },
+      { message: "Acho que meu modo ON piscou por um segundo 😅 Pode repetir?", _debug: { caught: msg } },
       { status: 500 },
     )
   }
