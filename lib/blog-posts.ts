@@ -1,4 +1,4 @@
-import { Droplets, Shield, Leaf, Sparkles, Trophy, Sun, Building2, type LucideIcon } from "lucide-react"
+import { Droplets, Shield, Leaf, Sparkles, Trophy, Sun, Building2, Activity, type LucideIcon } from "lucide-react"
 
 export interface BlogPostSection {
   subtitle: string
@@ -22,6 +22,55 @@ export interface BlogPost {
 }
 
 export const blogPosts: BlogPost[] = [
+  {
+    slug: "por-que-suar-faz-bem",
+    icon: Activity,
+    date: "04/03/2026",
+    title: "Por que suar faz bem? Entendendo o corpo em movimento",
+    subtitle: "O suor é um sinal de que o corpo está funcionando como deveria",
+    badge: "Corpo em Movimento",
+    image: "/images/suar-faz-bem-blog.png",
+    description:
+      "Suar durante o exercício ou no calor é muito mais do que desconforto — é o corpo trabalhando a seu favor. Entenda por que a transpiração é essencial para a saúde e como ela se conecta com o movimento.",
+    content: [
+      {
+        subtitle: "Suar é sinal de saúde",
+        text: "Muita gente associa o suor a algo negativo — desconforto, mau cheiro, roupas manchadas. Mas a verdade é que suar é um dos sinais mais claros de que o corpo está funcionando bem. A transpiração é o mecanismo natural que o organismo utiliza para regular a temperatura interna, especialmente durante atividades físicas, dias quentes ou momentos de esforço. Quando você se movimenta, os músculos geram calor. Para evitar o superaquecimento, o cérebro ativa as glândulas sudoríparas, que liberam suor na superfície da pele. Ao evaporar, esse suor resfria o corpo e mantém o equilíbrio térmico. É um sistema inteligente, eficiente e vital.",
+      },
+      {
+        subtitle: "Os benefícios reais da transpiração",
+        text: "Além de regular a temperatura, suar traz uma série de benefícios para o corpo que muitas vezes passam despercebidos.",
+        points: [
+          "Eliminação de toxinas: o suor ajuda a expelir substâncias como sódio, ureia e até metais pesados em pequenas quantidades, auxiliando o processo de desintoxicação natural do corpo.",
+          "Melhora da circulação: durante o exercício, o aumento da transpiração acompanha a dilatação dos vasos sanguíneos, favorecendo a circulação e a oxigenação dos tecidos.",
+          "Saúde da pele: a transpiração ajuda a desobstruir os poros e a eliminar impurezas acumuladas, contribuindo para uma pele mais limpa e saudável.",
+          "Fortalecimento imunológico: estudos indicam que o suor contém peptídeos antimicrobianos que atuam como uma camada adicional de defesa contra bactérias na superfície da pele.",
+          "Bem-estar emocional: suar durante o exercício está diretamente ligado à liberação de endorfinas, os hormônios responsáveis pela sensação de prazer e alívio do estresse.",
+        ],
+      },
+      {
+        subtitle: "O corpo em movimento pede cuidado",
+        text: "Entender que suar faz bem não significa ignorar os cuidados que a transpiração exige. O suor em si não tem cheiro, mas quando entra em contato com as bactérias naturais da pele — especialmente nas axilas — pode gerar odor e desconforto. Por isso, quem vive em movimento precisa de proteção que acompanhe o ritmo. Manter a higiene, usar roupas adequadas e escolher produtos que respeitem a pele são atitudes simples que fazem toda a diferença. O objetivo não é impedir o suor, mas conviver bem com ele.",
+      },
+      {
+        subtitle: "Dicas para quem sua e não quer parar",
+        points: [
+          "Hidrate-se antes, durante e depois da atividade física — o suor elimina água e sais minerais que precisam ser repostos.",
+          "Use roupas leves e de tecidos que favoreçam a evaporação, como dry-fit ou algodão.",
+          "Tome banho logo após o exercício para remover o suor e evitar a proliferação de bactérias.",
+          "Escolha um desodorante com tecnologia antitranspirante e ação antibacteriana, como DryOn, que oferece proteção prolongada sem agredir a pele.",
+          "Não tenha vergonha de suar — é o seu corpo dizendo que está vivo, ativo e funcionando.",
+        ],
+      },
+      {
+        subtitle: "Suar é viver ON",
+        text: "O suor é parte da experiência de estar vivo e em movimento. Ele acompanha cada treino, cada caminhada, cada momento de esforço e superação. Em vez de lutar contra ele, o caminho é entendê-lo e se preparar. Com os cuidados certos e a proteção adequada, suar deixa de ser um problema e passa a ser apenas mais um sinal de que você está vivendo no seu melhor ritmo.",
+      },
+    ],
+    productLineIndex: 3,
+    productLineName: "Sport",
+    productLineDescription: "Proteção e performance para quem vive em movimento",
+  },
   {
     slug: "abradilan-conexao-farma-2026",
     icon: Building2,
