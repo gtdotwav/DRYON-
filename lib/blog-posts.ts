@@ -23,6 +23,55 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: "quando-cuidado-vira-gasto",
+    icon: Sparkles,
+    date: "11/03/2026",
+    title: "Quando o cuidado vira gasto: como evitar manchas e não abrir mão de conforto e liberdade",
+    subtitle: "Proteger as roupas não precisa significar abrir mão do que funciona",
+    badge: "Dicas e Informações",
+    image: "/images/cuidado-manchas-blog.png",
+    description:
+      "Manchas amareladas nas axilas das camisetas, resíduos brancos em tecidos escuros, roupas descartadas antes da hora. O cuidado com o corpo não deveria custar o guarda-roupa. Entenda por que isso acontece e como evitar.",
+    content: [
+      {
+        subtitle: "O problema que ninguém conta",
+        text: "Você investe em roupas que gosta, escolhe com cuidado, cuida na lavagem — e mesmo assim, depois de algumas semanas, começa a notar aquelas manchas amareladas na região das axilas. Ou então, ao vestir uma camiseta preta, percebe resíduos brancos que não saem nem com escova. É frustrante. E é mais comum do que parece. O que pouca gente sabe é que, na maioria das vezes, o vilão não é o suor em si — mas a reação entre o suor e certos componentes presentes em desodorantes e antitranspirantes convencionais. O cuidado com o corpo acaba se transformando em gasto com roupas novas.",
+      },
+      {
+        subtitle: "Por que as manchas aparecem?",
+        text: "As manchas amareladas são causadas, principalmente, pela combinação de sais de alumínio (presentes em muitos antitranspirantes) com proteínas do suor. Essa reação forma compostos que se fixam nas fibras do tecido e se tornam cada vez mais difíceis de remover com o tempo. Já os resíduos brancos em roupas escuras geralmente surgem pela aplicação em excesso ou pela formulação do produto, que não é absorvida completamente pela pele antes do contato com o tecido.",
+        points: [
+          "Manchas amarelas: reação química entre alumínio e suor nas fibras.",
+          "Resíduos brancos: excesso de produto ou fórmula que não absorve bem.",
+          "Endurecimento do tecido: acúmulo de resíduos ao longo de várias lavagens.",
+          "Odor persistente: bactérias que se fixam nas fibras danificadas pela reação química.",
+        ],
+      },
+      {
+        subtitle: "O impacto no bolso e no dia a dia",
+        text: "Uma pesquisa informal entre consumidores mostra que roupas manchadas são uma das principais razões para o descarte precoce de peças de vestuário. Camisetas brancas, regatas e blusas claras são as mais afetadas. O resultado é um ciclo: você compra, mancha, descarta e compra de novo. Além do impacto financeiro, há o desconforto emocional. Quem lida com manchas visíveis nas roupas acaba evitando certas cores, certos tecidos e até certos momentos — como levantar os braços em público. O cuidado que deveria trazer liberdade passa a gerar limitação.",
+      },
+      {
+        subtitle: "Como evitar manchas sem abrir mão da proteção",
+        points: [
+          "Aplique o desodorante e espere secar completamente antes de se vestir — esse simples hábito já reduz muito os resíduos.",
+          "Prefira fórmulas que combinam proteção antitranspirante com rápida absorção, evitando o acúmulo nas fibras.",
+          "Lave as roupas logo após o uso prolongado no calor, sem deixar o suor secar no tecido por muitas horas.",
+          "Use água fria ou morna na lavagem das peças — água muito quente pode fixar as manchas.",
+          "Evite aplicar produto em excesso: uma camada fina e uniforme é suficiente para garantir proteção.",
+          "Escolha produtos dermatologicamente testados e com tecnologia anti-manchas, como a linha DryOn Invisible, desenvolvida para proteger sem deixar rastros.",
+        ],
+      },
+      {
+        subtitle: "Conforto e liberdade andam juntos",
+        text: "Cuidar do corpo não deveria significar abrir mão das roupas que você gosta ou evitar cores e tecidos por medo de manchas. A tecnologia certa permite que você tenha proteção real — contra suor, odor e bactérias — sem comprometer o seu guarda-roupa. Conforto é vestir o que quiser, quando quiser, sem pensar duas vezes. Liberdade é levantar os braços, se movimentar e viver o dia sem preocupação. E o cuidado certo é aquele que acompanha tudo isso, sem cobrar nada em troca.",
+      },
+    ],
+    productLineIndex: 2,
+    productLineName: "Invisible",
+    productLineDescription: "Proteção invisível que cuida das roupas e da pele",
+  },
+  {
     slug: "por-que-suar-faz-bem",
     icon: Activity,
     date: "04/03/2026",
