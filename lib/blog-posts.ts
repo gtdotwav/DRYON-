@@ -1,4 +1,4 @@
-import { Droplets, Shield, Leaf, Sparkles, Trophy, Sun, Building2, Activity, type LucideIcon } from "lucide-react"
+import { Droplets, Shield, Leaf, Sparkles, Trophy, Sun, Building2, Activity, Heart, type LucideIcon } from "lucide-react"
 
 export interface BlogPostSection {
   subtitle: string
@@ -22,6 +22,55 @@ export interface BlogPost {
 }
 
 export const blogPosts: BlogPost[] = [
+  {
+    slug: "cuidado-invisivel",
+    icon: Heart,
+    date: "19/03/2026",
+    title: 'O que é o "cuidado invisível"? Pequenos hábitos que transformam o dia sem você perceber',
+    subtitle: "Gestos simples que fazem diferença no bem-estar sem exigir esforço",
+    badge: "Dicas e Informações",
+    image: "/images/cuidado-invisivel-blog.png",
+    description:
+      "Nem todo cuidado precisa ser grandioso. Às vezes, são os pequenos hábitos — quase imperceptíveis — que mais transformam a qualidade do dia. Descubra o que é o cuidado invisível e como ele já pode estar presente na sua rotina.",
+    content: [
+      {
+        subtitle: "O cuidado que ninguém vê, mas todo mundo sente",
+        text: "Tem um tipo de cuidado que não aparece no espelho, não exige ritual elaborado e não precisa de hora marcada. Ele acontece nos detalhes: na forma como você começa o dia, nas escolhas que faz sem pensar muito e nos gestos automáticos que, somados, constroem uma rotina mais leve. O cuidado invisível é isso — tudo aquilo que você faz por si mesmo quase sem perceber, mas que impacta diretamente como você se sente ao longo do dia.",
+      },
+      {
+        subtitle: "Pequenos hábitos, grandes resultados",
+        text: "A ciência do bem-estar mostra que não são as grandes mudanças que sustentam uma vida mais saudável, mas sim a consistência dos pequenos gestos. Hábitos que parecem insignificantes, quando repetidos, criam uma base sólida de autocuidado.",
+        points: [
+          "Tomar um copo de água logo ao acordar: reidrata o corpo após horas de sono e ativa o metabolismo de forma natural.",
+          "Respirar fundo antes de sair de casa: três respirações profundas reduzem o cortisol e preparam a mente para o dia.",
+          "Escolher uma roupa que te faz sentir bem: o conforto com a própria imagem influencia a confiança e a disposição.",
+          "Aplicar o desodorante certo: a proteção que acompanha o dia inteiro, sem que você precise pensar nisso de novo.",
+          "Alongar o corpo por dois minutos: libera tensões acumuladas e melhora a postura sem exigir treino formal.",
+        ],
+      },
+      {
+        subtitle: "Por que o invisível importa tanto?",
+        text: "Vivemos em uma cultura que valoriza o esforço visível — o treino pesado, a dieta restritiva, a rotina cheia de etapas. Mas a verdade é que o bem-estar real se constrói nos bastidores. É o sono de qualidade que ninguém comenta, a água que você bebe sem contar, o produto que protege sua pele sem deixar rastro. O cuidado invisível importa porque é sustentável. Ele não exige força de vontade extrema, não cansa e não cobra resultados imediatos. Ele simplesmente funciona, dia após dia, criando uma versão mais confortável e confiante de você.",
+      },
+      {
+        subtitle: "Como incorporar o cuidado invisível na sua rotina",
+        points: [
+          "Comece pelo que já faz: observe seus hábitos atuais e identifique quais deles já são formas de autocuidado que você não reconhecia.",
+          "Simplifique ao máximo: quanto mais simples o hábito, maior a chance de ele se manter. Não complique o que pode ser natural.",
+          "Escolha produtos que trabalhem por você: um bom desodorante, um hidratante leve, um protetor solar — itens que cuidam enquanto você vive.",
+          "Não espere sentir necessidade: o melhor cuidado é preventivo. Beba água antes da sede, aplique proteção antes do suor, descanse antes do esgotamento.",
+          "Celebre a constância, não a intensidade: o hábito que se repete vale mais do que o gesto grandioso que acontece uma vez.",
+        ],
+      },
+      {
+        subtitle: "O cuidado que acompanha quem vive ON",
+        text: "Quem vive em movimento sabe que não dá para parar o dia para cuidar de si. O cuidado precisa acompanhar o ritmo — e é exatamente isso que o cuidado invisível propõe. Ele está na proteção que dura o dia inteiro, no conforto que não pede atenção e na confiança de saber que, mesmo sem pensar, você está se cuidando. Porque o melhor cuidado é aquele que você nem percebe que está acontecendo — mas que faz toda a diferença no final do dia.",
+      },
+    ],
+    productLineIndex: 0,
+    productLineName: "Natural Fresh",
+    productLineDescription: "Cuidado natural que acompanha sua rotina",
+  },
   {
     slug: "quando-cuidado-vira-gasto",
     icon: Sparkles,
