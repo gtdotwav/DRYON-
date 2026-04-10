@@ -35,10 +35,10 @@ The database has been implemented using Supabase with a complete schema for prod
 
 Execute the SQL scripts in order to create tables and seed data:
 
-```bash
+\`\`\`bash
 # These scripts are located in the /scripts folder
 # They will be executed automatically when you run them in v0
-```
+\`\`\`
 
 1. `001_create_products_schema.sql` - Creates tables, indexes, and RLS policies
 2. `002_seed_products_data.sql` - Seeds initial product data
@@ -47,7 +47,7 @@ Execute the SQL scripts in order to create tables and seed data:
 
 The database access layer is implemented in `/lib/db/products.ts`:
 
-```typescript
+\`\`\`typescript
 import { getAllProducts, getProductBySlug } from '@/lib/db/products'
 
 // Get all products with their ingredients and claimings
@@ -55,7 +55,7 @@ const products = await getAllProducts()
 
 // Get a specific product by slug
 const product = await getProductBySlug('dryon-sensitive')
-```
+\`\`\`
 
 ### 3. Supabase Client
 

@@ -2,142 +2,83 @@
 
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useIsVisible } from "@/hooks/use-intersection-observer"
 
 const banners = [
   {
     id: 1,
-    type: "image" as const,
-    image: "/images/futebol-banner.png",
-    alt: "Futebol no Modo ON - DryOn Patrocinador Oficial do Campeonato Carioca e Mineiro 2026",
-  },
-  {
-    id: 2,
-    type: "image" as const,
     image: "/images/softcareban.png",
     alt: "Proteção e Hidratação o dia tôdo - DryOn Soft Care enriquecido com Vitamina E e 0% álcool",
   },
   {
-    id: 3,
-    type: "image" as const,
+    id: 2,
     image: "/images/pink-20powder.png",
     alt: "Livre, Leve, On - DryOn Pink Powder com 72h de proteção intensiva",
   },
   {
-    id: 4,
-    type: "video" as const,
-    videoSrc: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/96H%20NO%20MODO%20ON-ubcdvj1Wqcay19LkhFadbRXNOc4ApI.mp4",
+    id: 3,
     image: "/images/golden-banner.png",
-    alt: "Modo Praia ON - DryOn 96h de proteção",
+    alt: "Você On no Modo - DryOn Pink Powder para estilo de vida ativo",
   },
   {
-    id: 5,
-    type: "image" as const,
+    id: 4,
     image: "/images/modo-trabalho.png",
     alt: "Modo On Rotina - DryOn Men Flow com 72h de proteção intensiva",
   },
   {
-    id: 6,
-    type: "video" as const,
-    videoSrc: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PARTIU%20NOITADA%20-%20DESKTOP-PCeDWV8ODzvvYqNZIWqFMHM7oYhbQ7.mp4",
-    alt: "Partiu Noitada - DryOn com proteção intensiva para festas e eventos",
-  },
-  {
-    id: 7,
-    type: "image" as const,
-    image: "/images/sport-line-desktop.png",
-    alt: "É Pra Viver? Tô On! - DryOn SportFit e DryOn Men 4Sport com 96h de proteção extrema",
+    id: 5,
+    image: "/images/modo-noitada-desktop.png",
+    alt: "Modo On Noitada - DryOn Invisible com 72h de proteção intensiva para festas e eventos",
   },
 ]
 
 export default function HeroBanner() {
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
   const bannerRef = useRef<HTMLElement>(null)
-  const videoRefs = useRef<{ [key: number]: HTMLVideoElement | null }>({})
   const isVisible = useIsVisible(bannerRef, { threshold: 0.1 })
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
     }
+
     checkMobile()
     window.addEventListener("resize", checkMobile)
+
     return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
-  const advanceSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % banners.length)
-  }, [])
-
-  const scheduleNextSlide = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-      timeoutRef.current = null
-    }
-
-    const currentBanner = banners[currentSlide]
-
-    if (currentBanner.type === "image") {
-      timeoutRef.current = setTimeout(advanceSlide, 3000) // Reduced image display time from 5000ms to 3000ms (3 seconds)
-    }
-  }, [currentSlide, advanceSlide])
-
   useEffect(() => {
-    if (!isVisible) {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-        timeoutRef.current = null
-      }
-      return
-    }
-    scheduleNextSlide()
+    if (!isAutoPlaying || !isVisible) return
 
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-        timeoutRef.current = null
-      }
-    }
-  }, [isVisible, currentSlide, scheduleNextSlide])
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % banners.length)
+    }, 3000) // Increased from 5s to 6s for better performance
 
-  useEffect(() => {
-    Object.entries(videoRefs.current).forEach(([indexStr, video]) => {
-      const index = Number.parseInt(indexStr)
-      if (!video) return
+    return () => clearInterval(interval)
+  }, [isAutoPlaying, isVisible])
 
-      if (index === currentSlide && isVisible) {
-        video.currentTime = 0
-        video.play().catch(() => {})
-      } else {
-        video.pause()
-        video.currentTime = 0
-      }
-    })
-  }, [currentSlide, isVisible])
-
-  const handleVideoEnded = useCallback(() => {
-    advanceSlide()
-  }, [advanceSlide])
-
-  const goToSlide = useCallback((index: number) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-      timeoutRef.current = null
-    }
+  const goToSlide = (index: number) => {
     setCurrentSlide(index)
-  }, [])
+    setIsAutoPlaying(false)
+    setTimeout(() => setIsAutoPlaying(true), 10000)
+  }
 
-  const nextSlide = useCallback(() => {
-    goToSlide((currentSlide + 1) % banners.length)
-  }, [currentSlide, goToSlide])
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % banners.length)
+    setIsAutoPlaying(false)
+    setTimeout(() => setIsAutoPlaying(true), 10000)
+  }
 
-  const prevSlide = useCallback(() => {
-    goToSlide((currentSlide - 1 + banners.length) % banners.length)
-  }, [currentSlide, goToSlide])
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length)
+    setIsAutoPlaying(false)
+    setTimeout(() => setIsAutoPlaying(true), 10000)
+  }
 
   return (
     <section ref={bannerRef} className="relative w-full mt-20 -mb-1 hidden md:block">
@@ -152,40 +93,16 @@ export default function HeroBanner() {
             className="absolute inset-0 flex items-center justify-center"
           >
             <div className="relative w-full h-full">
-              {banners[currentSlide].type === "video" ? (
-                <video
-                  ref={(el) => {
-                    videoRefs.current[currentSlide] = el
-                  }}
-                  src={banners[currentSlide].videoSrc}
-                  className="w-full h-full object-cover object-top [&::-webkit-media-controls]:!hidden [&::-webkit-media-controls-panel]:!hidden [&::-webkit-media-controls-play-button]:!hidden [&::-webkit-media-controls-start-playback-button]:!hidden"
-                  autoPlay
-                  muted
-                  playsInline
-                  controls={false}
-                  disablePictureInPicture
-                  disableRemotePlayback
-                  preload="auto"
-                  webkit-playsinline="true"
-                  x-webkit-airplay="deny"
-                  style={{
-                    pointerEvents: "none",
-                    objectFit: "cover",
-                  }}
-                  onEnded={handleVideoEnded}
-                />
-              ) : (
-                <Image
-                  src={banners[currentSlide].image || "/placeholder.svg"}
-                  alt={banners[currentSlide].alt}
-                  fill
-                  priority={currentSlide === 0}
-                  className="object-cover object-top"
-                  quality={100}
-                  sizes="100vw"
-                  loading={currentSlide === 0 ? "eager" : "lazy"}
-                />
-              )}
+              <Image
+                src={banners[currentSlide].image || "/placeholder.svg"}
+                alt={banners[currentSlide].alt}
+                fill
+                priority={currentSlide === 0}
+                className="object-cover object-center"
+                quality={100}
+                sizes="100vw"
+                loading={currentSlide === 0 ? "eager" : "lazy"}
+              />
             </div>
           </motion.div>
         </AnimatePresence>
@@ -211,8 +128,7 @@ export default function HeroBanner() {
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              aria-current={index === currentSlide ? "true" : undefined}
-              className={`h-2.5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 ${
+              className={`h-2.5 rounded-full transition-all duration-300 ${
                 index === currentSlide
                   ? "bg-white w-10 shadow-lg"
                   : "bg-white/50 backdrop-blur-sm w-2.5 hover:bg-white/70"

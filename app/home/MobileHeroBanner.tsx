@@ -1,219 +1,178 @@
 "use client"
 
 import Image from "next/image"
-import { useState, useEffect, useCallback, memo, useRef } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { useRef, useState, useEffect, useCallback } from "react"
+import { useIsVisible } from "@/hooks/use-intersection-observer"
 
 const BANNERS = [
-  { type: "image" as const, src: "/images/futebol-banner-mobile.png", alt: "Futebol no Modo ON - DryOn Patrocinador Oficial do Campeonato Carioca e Mineiro 2026" },
-  { type: "image" as const, src: "/images/pinkpwsd.png", alt: "Livre, Leve, ON - DryOn Pink Powder" },
   {
-    type: "video" as const,
-    videoSrc: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/novo%20banner%20praia%20junior-8Mmfausx0JY3DROOL32lHS2QNkhbrB.mp4",
     src: "/images/modo-praia-mobile.png",
-    alt: "Modo Praia ON - DryOn Natural Fresh",
+    alt: "Modo Praia ON - DryOn Natural Fresh com 72h de proteção intensiva",
   },
-  { type: "image" as const, src: "/images/soc.png", alt: "Proteção e Hidratação - DryOn Soft Care" },
-  { type: "image" as const, src: "/images/modotrabalho3.png", alt: "Modo Trabalho ON - DryOn Men Flow" },
   {
-    type: "video" as const,
-    videoSrc: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/novo1%20%281%29-rtLNa8zyq14KLNfTf79Vd6j4exWHwC.mp4",
-    src: "/images/modo-noitada-mobile.png",
-    alt: "Modo Noitada ON - DryOn Invisible",
+    src: "/images/pinkpwsd.png",
+    alt: "Livre, Leve, ON - DryOn Pink Powder com 72h de proteção intensiva",
   },
-  { type: "image" as const, src: "/images/sport-line-mobile.png", alt: "É Pra Viver? Tô On! - DryOn Sport" },
+  {
+    src: "/images/soc.png",
+    alt: "Proteção e Hidratação o Dia Todo - DryOn Soft Care enriquecido com Vitamina E",
+  },
+  {
+    src: "/images/modo-20trabalho.png",
+    alt: "Modo Trabalho ON - DryOn Men Flow com 72h de proteção intensiva",
+  },
+  {
+    src: "/images/modo-noitada-mobile.png",
+    alt: "Modo Noitada ON - DryOn Invisible com 72h de proteção intensiva para festas e eventos",
+  },
 ] as const
 
-// Prevent hydration mismatches by only rendering after mount
-const useHasMounted = () => {
-  const [hasMounted, setHasMounted] = useState(false)
-  useEffect(() => {
-    setHasMounted(true)
-  }, [])
-  return hasMounted
-}
-
-const IMAGE_INTERVAL = 3000
-
-const Dot = memo(function Dot({
-  active,
-  onClick,
-  label,
-}: {
-  active: boolean
-  onClick: () => void
-  label: string
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className={`h-2 rounded-full transition-[width,background] duration-300 ${
-        active ? "bg-white w-8" : "bg-white/50 w-2"
-      }`}
-    />
-  )
-})
+const CAROUSEL_INTERVAL = 5000
 
 export default function MobileHeroBanner() {
-  const [current, setCurrent] = useState(0)
-  const videoRefs = useRef<Map<number, HTMLVideoElement>>(new Map())
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const bannerRef = useRef<HTMLElement>(null)
+  const isVisible = useIsVisible(bannerRef, { threshold: 0.1 })
+  const [currentIndex, setCurrentIndex] = useState(0)
 
-  const advanceSlide = useCallback(() => {
-    setCurrent((prev) => (prev + 1) % BANNERS.length)
-  }, [])
-
-  const scheduleNextSlide = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
-
-    const currentBanner = BANNERS[current]
-
-    if (currentBanner.type === "video") {
-      return
-    }
-
-    // For images, schedule next slide after interval
-    timeoutRef.current = setTimeout(advanceSlide, IMAGE_INTERVAL)
-  }, [current, advanceSlide])
-
-  useEffect(() => {
-    if (document.hidden) return
-    scheduleNextSlide()
-
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-      }
-    }
-  }, [current, scheduleNextSlide])
-
-  useEffect(() => {
-    videoRefs.current.forEach((video, index) => {
-      if (index === current) {
-        video.currentTime = 0
-        const playPromise = video.play()
-        if (playPromise !== undefined) {
-          playPromise.catch((error) => {
-            console.log("[v0] Video autoplay prevented:", error)
-          })
-        }
-      } else {
-        video.pause()
-        video.currentTime = 0
-      }
-    })
-  }, [current])
-
-  const handleVideoEnded = useCallback(() => {
-    advanceSlide()
-  }, [advanceSlide])
-
-  const setVideoRef = useCallback((index: number, el: HTMLVideoElement | null) => {
-    if (el) {
-      videoRefs.current.set(index, el)
-    } else {
-      videoRefs.current.delete(index)
-    }
+  const nextSlide = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % BANNERS.length)
   }, [])
 
   useEffect(() => {
-    const next = (current + 1) % BANNERS.length
-    const banner = BANNERS[next]
-    if (banner.type === "image") {
-      const img = new window.Image()
-      img.src = banner.src
-    }
-  }, [current])
+    const timer = setInterval(nextSlide, CAROUSEL_INTERVAL)
+    return () => clearInterval(timer)
+  }, [nextSlide])
 
-  const goTo = useCallback((i: number) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
-    setCurrent(i)
+  const handleDotClick = useCallback((index: number) => {
+    setCurrentIndex(index)
   }, [])
 
   return (
-    <section className="relative w-full -mb-1 md:hidden">
-      <div className="relative w-full bg-gradient-to-br from-[#2B7A9A] to-[#1E5A7A]" style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}>
-        {BANNERS.map((banner, i) => (
-          <div
-            key={banner.src}
-            className={`${i === current ? "relative" : "absolute inset-0"} ${
-              i === current ? "opacity-100 z-10" : "opacity-0 pointer-events-none z-0"
-            }`}
-            style={{ 
-              transition: 'opacity 500ms ease-in-out',
-              transform: 'translateZ(0)',
-              backfaceVisibility: 'hidden',
-              willChange: i === current ? 'opacity' : 'auto'
-            }}
+    <section
+      ref={bannerRef}
+      className="relative w-full h-full -mb-1 block md:hidden"
+      aria-label="Banner principal mobile"
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+        transition={{ duration: 0.6 }}
+        className="relative w-full h-[70vh] min-h-[500px] max-h-[700px] overflow-hidden bg-gradient-to-br from-[#2B7A9A] to-[#1E5A7A]"
+      >
+        {/* Carousel Images */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentIndex}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="absolute inset-0"
           >
-            {banner.type === "video" ? (
-              <video
-                ref={(el) => setVideoRef(i, el)}
-                src={banner.videoSrc}
-                className="w-full h-auto object-cover"
-                autoPlay
-                muted
-                playsInline
-                preload="auto"
-                controls={false}
-                disablePictureInPicture
-                disableRemotePlayback
-                onEnded={handleVideoEnded}
-                style={{
-                  pointerEvents: "none",
-                  width: "100%",
-                  height: "auto",
-                  transform: 'translateZ(0)',
-                  backfaceVisibility: 'hidden',
-                }}
-              />
-            ) : (
-              <Image
-                src={banner.src || "/placeholder.svg"}
-                alt={banner.alt}
-                width={750}
-                height={1200}
-                priority={i === 0}
-                loading={i < 2 ? "eager" : "lazy"}
-                className="w-full h-auto"
-                sizes="100vw"
-                quality={80}
-                style={{
-                  transform: 'translateZ(0)',
-                  backfaceVisibility: 'hidden',
-                }}
-              />
-            )}
-          </div>
-        ))}
+            <Image
+              src={BANNERS[currentIndex].src || "/placeholder.svg"}
+              alt={BANNERS[currentIndex].alt}
+              fill
+              priority={currentIndex === 0}
+              className="object-cover object-top md:object-contain md:object-center"
+              quality={100}
+              sizes="100vw"
+              loading={currentIndex === 0 ? "eager" : "lazy"}
+            />
+          </motion.div>
+        </AnimatePresence>
 
-        <nav className="absolute bottom-32 left-1/2 -translate-x-1/2 z-30 flex gap-2">
-          {BANNERS.map((b, i) => (
-            <Dot key={i} active={i === current} onClick={() => goTo(i)} label={b.alt} />
+        {/* Navigation Dots */}
+        <div
+          className="absolute bottom-20 left-1/2 -translate-x-1/2 z-30 flex gap-2 py-0"
+          role="tablist"
+          aria-label="Navegação do carrossel"
+        >
+          {BANNERS.map((banner, index) => (
+            <button
+              key={index}
+              onClick={() => handleDotClick(index)}
+              role="tab"
+              aria-selected={index === currentIndex}
+              aria-label={`Ir para ${banner.alt}`}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                index === currentIndex ? "bg-white w-8 shadow-lg" : "bg-white/50 w-2 hover:bg-white/70"
+              }`}
+            />
           ))}
-        </nav>
-      </div>
+        </div>
+      </motion.div>
 
       {/* Wave Divider */}
       <div
         className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] -mb-px z-20 pointer-events-none"
         aria-hidden="true"
       >
-        <svg className="relative block w-full h-[100px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
-          <path
+        <svg
+          className="relative block w-full h-[100px]"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 1200 120"
+          preserveAspectRatio="none"
+        >
+          <defs>
+            <linearGradient id="mobileWaveGradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="rgba(255,255,255,0.3)" />
+              <stop offset="50%" stopColor="rgba(248,250,252,0.5)" />
+              <stop offset="100%" stopColor="rgba(255,255,255,0.3)" />
+            </linearGradient>
+
+            <linearGradient id="mobileWaveGradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="rgba(248,250,252,0.6)" />
+              <stop offset="50%" stopColor="rgba(241,245,249,0.8)" />
+              <stop offset="100%" stopColor="rgba(248,250,252,0.6)" />
+            </linearGradient>
+
+            <filter id="mobileWaveShadow">
+              <feDropShadow dx="0" dy="2" stdDeviation="4" floodOpacity="0.15" />
+            </filter>
+          </defs>
+
+          {/* Wave Layer 1 */}
+          <motion.path
             d="M0,20 C200,70 400,70 600,45 C800,20 1000,20 1200,50 L1200,120 L0,120 Z"
-            fill="rgba(248,250,252,0.3)"
+            fill="url(#mobileWaveGradient1)"
+            opacity="0.5"
+            animate={isVisible ? { y: [0, -3, 0] } : { y: 0 }}
+            transition={{
+              duration: 6,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+            }}
           />
-          <path
+
+          {/* Wave Layer 2 */}
+          <motion.path
             d="M0,35 C250,80 450,80 650,60 C850,40 1050,40 1200,65 L1200,120 L0,120 Z"
-            fill="rgba(248,250,252,0.6)"
+            fill="url(#mobileWaveGradient2)"
+            opacity="0.7"
+            filter="url(#mobileWaveShadow)"
+            animate={isVisible ? { y: [2, -2, 2] } : { y: 2 }}
+            transition={{
+              duration: 5,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+              delay: 0.3,
+            }}
           />
-          <path d="M0,50 C300,90 500,90 700,75 C900,60 1100,60 1200,75 L1200,120 L0,120 Z" fill="#F8FAFC" />
+
+          {/* Wave Layer 3 */}
+          <motion.path
+            d="M0,50 C300,90 500,90 700,75 C900,60 1100,60 1200,75 L1200,120 L0,120 Z"
+            fill="#F8FAFC"
+            animate={isVisible ? { y: [1, -2, 1] } : { y: 1 }}
+            transition={{
+              duration: 7,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+              delay: 0.6,
+            }}
+          />
         </svg>
       </div>
     </section>

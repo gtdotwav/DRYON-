@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-export const runtime = "edge"
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || ""
 
-const SYSTEM_PROMPT = `Você é a Lia, a assistente virtual inteligente da DryOn.
+const SYSTEM_PROMPT = `Você é a Lia ON, a assistente virtual inteligente da DryOn.
 
 PERSONALIDADE E TOM:
 - Tom humano, afetivo, próximo e otimista
@@ -49,96 +49,40 @@ FORMATAÇÃO:
 - Escreva texto simples e limpo, sem símbolos de formatação
 - Use apenas emojis e texto corrido`
 
-const MAX_MESSAGES = 20
-const MAX_MESSAGE_LENGTH = 500
-
 export async function POST(request: NextRequest) {
-  // Strip any non-printable/invisible characters that may have been pasted into Vercel env
-  const apiKey = (process.env.ANTHROPIC_API_KEY || "").replace(/[^a-zA-Z0-9\-_]/g, "")
-  if (!apiKey) {
-    console.error("ANTHROPIC_API_KEY not configured")
-    return NextResponse.json(
-      { message: "Serviço temporariamente indisponível." },
-      { status: 503 },
-    )
-  }
-
-  let body: { messages?: unknown }
   try {
-    body = await request.json()
-  } catch {
-    return NextResponse.json({ message: "Mensagem inválida." }, { status: 400 })
-  }
+    const { messages } = await request.json()
 
-  const { messages } = body
-  if (!Array.isArray(messages) || messages.length === 0) {
-    return NextResponse.json({ message: "Mensagem inválida." }, { status: 400 })
-  }
-
-  if (messages.length > MAX_MESSAGES) {
-    return NextResponse.json(
-      { message: "Conversa muito longa. Por favor, inicie uma nova conversa." },
-      { status: 400 },
-    )
-  }
-
-  const sanitizedMessages = messages
-    .filter((m: { role?: string; content?: string }) => m.role && m.content)
-    .map((m: { role: string; content: string }) => ({
-      role: m.role === "user" ? "user" : "assistant",
-      content: String(m.content).slice(0, MAX_MESSAGE_LENGTH),
-    }))
-
-  const requestBody = JSON.stringify({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 300,
-    system: SYSTEM_PROMPT,
-    messages: sanitizedMessages,
-  })
-
-  try {
-    const response = await globalThis.fetch("https://api.anthropic.com/v1/messages", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
-      headers: new Headers({
-        "content-type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4",
+        messages: [
+          {
+            role: "system",
+            content: SYSTEM_PROMPT,
+          },
+          ...messages,
+        ],
+        temperature: 0.8,
+        max_tokens: 300,
       }),
-      body: requestBody,
     })
 
     if (!response.ok) {
-      const errorBody = await response.text()
-      console.error("Anthropic API error " + response.status + ": " + errorBody)
-
-      if (response.status === 429) {
-        return NextResponse.json(
-          { message: "A Lia está temporariamente indisponível. Tente novamente em alguns minutos 💛" },
-          { status: 503 },
-        )
-      }
-
-      return NextResponse.json(
-        { message: "Acho que meu modo ON piscou por um segundo 😅 Pode repetir?" },
-        { status: 500 },
-      )
+      throw new Error(`OpenAI API error: ${response.statusText}`)
     }
 
     const data = await response.json()
-    const message = data.content?.[0]?.text
-
-    if (!message) {
-      console.error("No text in response: " + JSON.stringify(data).slice(0, 300))
-      return NextResponse.json(
-        { message: "Acho que meu modo ON piscou por um segundo 😅 Pode repetir?" },
-        { status: 500 },
-      )
-    }
+    const message = data.choices[0].message.content
 
     return NextResponse.json({ message })
   } catch (error) {
-    const msg = error instanceof Error ? error.name + ": " + error.message : String(error)
-    console.error("Chat fetch error: " + msg)
+    console.error("Chat API error:", error)
     return NextResponse.json(
       { message: "Acho que meu modo ON piscou por um segundo 😅 Pode repetir?" },
       { status: 500 },

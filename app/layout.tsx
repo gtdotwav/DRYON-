@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://dryon.com.br"),
   title: "DryOn — Você no modo ON",
   description:
-    "Conheça a linha completa de desodorantes para manter suas axilas secas e protegidas o dia todo. DryON é proteção descomplicada para o brasileiro que faz render.",
+    "Desodorantes DryOn: proteção descomplicada para brasileiros excelentes. Pertencimento, Cuidado e Performance.",
   keywords: ["DryOn", "desodorante", "antitranspirante", "96h", "vitamina E", "Brasil"],
   icons: {
     icon: "/favicon.png",
@@ -79,17 +79,6 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={`${lato.variable} ${bebasNeue.variable}`} suppressHydrationWarning>
       <head>
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPTWXNXTF7"></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-FPTWXNXTF7');
-            `,
-          }}
-        />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
         <link rel="dns-prefetch" href="https://hebbkx1anhila5yf.public.blob.vercel-storage.com" />
